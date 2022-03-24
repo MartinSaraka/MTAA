@@ -9,6 +9,6 @@ urlpatterns = [
     #path('admin/grouptrainings', ),
     path('users/register', views.user_register),
     path('users/login', views.user_login),
-    #path('trainigns/signup', ),
+    path('trainings/signup', views.training_user),
     #path('trainings', )
 ]
