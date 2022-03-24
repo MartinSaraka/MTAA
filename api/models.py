@@ -8,5 +8,5 @@ class User(models.Model):
     group_training = models.BooleanField()
 
     class Meta:
-        model = User
-        fields = ('__all__')
+        db_table = 'users'
+
