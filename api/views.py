@@ -3,10 +3,23 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 import psycopg2
 import os
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .serializers import *
 from .models import *
 import json
+import environ
+env = environ.Env()
+environ.Env.read_env()
+
+# Connect to an existing database
+connection = psycopg2.connect(
+        dbname = env('DB_NAME'),
+        user = env('DB_USER'),
+        password = env('DB_PASSWORD'),
+        host = "localhost",
+        port = "5432")
+
+cursor = connection.cursor()
 
 
 @api_view(['POST'])
@@ -75,3 +88,42 @@ def delete_training(request, id):
         trainings_users.delete()
         object.delete()
         return Response(status=200)
+    
+    
+
+@api_view(['GET'])
+def get_trainings(request):
+    
+    cursor.execute("SELECT * from trainings")
+    
+    
+    record = cursor.fetchone()
+    if record == None :
+        somarina = {
+            "hm":"Ic do pici"
+        }
+        return JsonResponse(somarina)
+    print(record)
+    training = {
+            "id":record[0],
+            "title":record[1],
+            "time":record[2], 
+            "date":record[3]
+        }
+    trainings = {
+            "training":[training]
+        } 
+    
+    while record != None:
+        record = cursor.fetchone()
+        if record == None:
+            break
+        training = {
+            "id":record[0],
+            "title":record[1],
+            "time":record[2],
+            "date":record[3]
+        }
+        trainings["training"].append(training)
+    
+    return JsonResponse(trainings)     
