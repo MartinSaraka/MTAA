@@ -19,7 +19,7 @@ def add_user(request):
     #else:
         #print("Not good")
 
-@api_view(['GET'])
+@api_view(['POST'])
 def user_login(request):
     serializer = UserLoginItemSerializer(data=request.data)
     if serializer.is_valid():
