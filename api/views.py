@@ -27,9 +27,9 @@ def user_login(request):
         if user_object:
             return Response(status=200)
         else:
-            return Response(status=400)
+            return Response(status=403)
     else:
-        return Response(status=405)
+        return Response(status=400)
 
 @api_view(['POST'])
 def user_register(request):
@@ -40,9 +40,9 @@ def user_register(request):
             serializer.save()
             return Response(status=200)
         else:
-            return Response(status=402)
+            return Response(status=409)
     else:
-        return Response(status=405)
+        return Response(status=400)
 
 
 @api_view(['POST'])
@@ -52,7 +52,7 @@ def add_training(request):
         serializer.save()
         return Response(status=200)
     else:
-        return Response(status=405)
+        return Response(status=400)
 
 
 @api_view(['POST'])
@@ -62,7 +62,7 @@ def training_user(request):
         serializer.save()
         return Response(status=200)
     else:
-        return Response(status=405)
+        return Response(status=400)
 
 
 @api_view(['DELETE'])
@@ -70,7 +70,7 @@ def delete_training(request, id):
     trainings_users = TrainingUser.objects.get(training=id)
     object = Training.objects.get(id=id)
     if not object:
-        return Response(status=404)
+        return Response(status=400)
     else:
         trainings_users.delete()
         object.delete()
