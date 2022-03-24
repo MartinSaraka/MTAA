@@ -7,3 +7,6 @@ class User(models.Model):
     password = models.CharField(max_length=200)
     group_training = models.BooleanField()
 
+    class Meta:
+        model = User
+        fields = ('__all__')
