@@ -26,7 +26,7 @@ class Gym(models.Model):
 
 class Coach(models.Model):
     name = models.CharField(max_length=200)
-    gym_id = models.ForeignKey(Gym, on_delete=models.DO_NOTHING)
+    gym = models.ForeignKey(Gym, on_delete=models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -37,7 +37,7 @@ class Training(models.Model):
     title = models.CharField(max_length=200)
     time = models.TimeField()
     date = models.DateField(default=django.utils.timezone.now)
-    coach_id = models.ForeignKey(Coach, on_delete=models.DO_NOTHING)
+    coach = models.ForeignKey(Coach, on_delete=models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -46,8 +46,8 @@ class Training(models.Model):
 
 
 class TrainingUser(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    training_id = models.ForeignKey(Training, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    training = models.ForeignKey(Training, on_delete=models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

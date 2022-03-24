@@ -22,24 +22,23 @@ class CoachItemSerializer(serializers.ModelSerializer):
 
 
 class TrainingItemSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=200)
     title = serializers.CharField(max_length=200)
     time = serializers.TimeField()
     date = serializers.DateField()
-    coach_id = serializers.IntegerField()
+    coach = serializers.PrimaryKeyRelatedField(queryset=Coach.objects.all())
 
     class Meta:
         model = Training
-        fields = ['name', 'title', 'time', 'date']
+        fields = ['title', 'time', 'date', 'coach']
 
 
 class TrainingUserItemSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField()
-    training_id = serializers.IntegerField()
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    training = serializers.PrimaryKeyRelatedField(queryset=Training.objects.all())
 
     class Meta:
         model = TrainingUser
-        fields = ['user_id', 'training_id']
+        fields = ['user', 'training']
 
 
 class GroupTrainingItemSerializer(serializers.ModelSerializer):

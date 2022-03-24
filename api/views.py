@@ -45,3 +45,21 @@ def user_register(request):
         return Response(status=405)
 
 
+@api_view(['POST'])
+def add_training(request):
+    serializer = TrainingItemSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(status=200)
+    else:
+        return Response(status=405)
+
+@api_view(['POST'])
+def training_user(request):
+    serializer = TrainingUserItemSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(status=200)
+    else:
+        return Response(status=405)
+
