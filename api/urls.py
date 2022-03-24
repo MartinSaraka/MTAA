@@ -7,8 +7,8 @@ urlpatterns = [
     #path('admin/trainings/<int:id>', views.add_training),
     #path('admin/trainings', ),
     #path('admin/grouptrainings', ),
-    path('users/register', views.add_user),
-    #path('users/login', ),
+    path('users/register', views.user_register),
+    path('users/login', views.user_login),
     #path('trainigns/signup', ),
     #path('trainings', )
 ]
