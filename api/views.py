@@ -19,7 +19,7 @@ def add_user(request):
     #else:
         #print("Not good")
 
-@api_view(['GET'])
+@api_view(['POST'])
 def user_login(request):
     serializer = UserLoginItemSerializer(data=request.data)
     if serializer.is_valid():
@@ -41,6 +41,16 @@ def user_register(request):
             return Response(status=200)
         else:
             return Response(status=402)
+    else:
+        return Response(status=405)
+
+
+@api_view(['POST'])
+def add_training(request):
+    serializer = TrainingItemSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(status=200)
     else:
         return Response(status=405)
 
