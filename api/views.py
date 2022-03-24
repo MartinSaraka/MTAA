@@ -54,6 +54,7 @@ def add_training(request):
     else:
         return Response(status=405)
 
+
 @api_view(['POST'])
 def training_user(request):
     serializer = TrainingUserItemSerializer(data=request.data)
@@ -63,3 +64,14 @@ def training_user(request):
     else:
         return Response(status=405)
 
+
+@api_view(['DELETE'])
+def delete_training(request, id):
+    trainings_users = TrainingUser.objects.get(training=id)
+    object = Training.objects.get(id=id)
+    if not object:
+        return Response(status=404)
+    else:
+        trainings_users.delete()
+        object.delete()
+        return Response(status=200)
