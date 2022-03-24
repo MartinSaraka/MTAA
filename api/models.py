@@ -2,6 +2,7 @@ from django.db import models
 from datetime import date
 import django.utils.timezone
 
+
 class User(models.Model):
     name = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
@@ -24,6 +25,7 @@ class Gym(models.Model):
     class Meta:
         db_table = 'gym'
 
+
 class Coach(models.Model):
     name = models.CharField(max_length=200)
     gym = models.ForeignKey(Gym, on_delete=models.DO_NOTHING)
@@ -33,11 +35,12 @@ class Coach(models.Model):
     class Meta:
         db_table = 'coach'
 
+
 class Training(models.Model):
     title = models.CharField(max_length=200)
     time = models.TimeField()
     date = models.DateField(default=django.utils.timezone.now)
-    coach = models.ForeignKey(Coach, on_delete=models.DO_NOTHING)
+    coach = models.ForeignKey(Coach, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
