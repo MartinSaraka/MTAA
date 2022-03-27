@@ -38,7 +38,8 @@ def user_login(request):
     if serializer.is_valid():
         user_object = User.objects.filter(name=serializer.initial_data['name'], password=serializer.initial_data['password'])
         if user_object:
-            return Response(status=200)
+            data = {"id":user_object[0].id}
+            return JsonResponse(data, status=200)
         else:
             return Response(status=403)
     else:
@@ -48,8 +49,9 @@ def user_login(request):
 def user_register(request):
     serializer = UserItemSerializer(data=request.data)
     if serializer.is_valid():
-        user_object = User.objects.filter(email=serializer.initial_data['email'])
-        if not user_object:
+        user_object_email = User.objects.filter(email=serializer.initial_data['email'])
+        user_object_name = User.objects.filter(name=serializer.initial_data['name'])
+        if not user_object_email and not user_object_name:
             serializer.save()
             return Response(status=200)
         else:
@@ -94,21 +96,20 @@ def delete_training(request, id):
 @api_view(['GET'])
 def get_trainings(request):
     
-    cursor.execute("SELECT * from trainings")
-    
-    
+    cursor.execute("SELECT id, title, time, date, CASE WHEN training_id is NULL THEN False ELSE True END as signed_up from trainings LEFT JOIN (SELECT training_id FROM user_training WHERE user_id = 2) x ON trainings.id = training_id ")
     record = cursor.fetchone()
     if record == None :
         somarina = {
             "hm":"Ic do pici"
         }
-        return JsonResponse(somarina)
+        return JsonResponse(somarina, status=404)
     print(record)
     training = {
             "id":record[0],
             "title":record[1],
             "time":record[2], 
-            "date":record[3]
+            "date":record[3],
+            "signed_up":record[4]
         }
     trainings = {
             "training":[training]
@@ -122,8 +123,46 @@ def get_trainings(request):
             "id":record[0],
             "title":record[1],
             "time":record[2],
-            "date":record[3]
+            "date":record[3],
+            "signed_up":record[4]
         }
         trainings["training"].append(training)
     
-    return JsonResponse(trainings)     
+    return JsonResponse(trainings)
+
+
+@api_view(['GET'])
+def get_grouptraining(request):
+    try:
+        object = GroupTraining.objects.get()
+    except GroupTraining.DoesNotExist:
+        return Response(status=404)
+    data = {
+        "date": object.date,
+        "time": object.time,
+        "image": object.image
+    }
+    return JsonResponse(data, status=200)
+
+@api_view(['PUT'])
+def put_grouptraining(request):
+    serializer = GroupTrainingItemSerializer(data=request.data)
+    if serializer.is_valid():
+        data = request.data
+        GroupTraining.objects.all().update(date=data['date'], time=data['time'], image=data['image'])
+        return Response(status=200)
+    else:
+        return Response(status=400)
+
+@api_view(['PUT'])
+def put_training(request, id):
+    serializer = TrainingTimeItemSerializer(data=request.data)
+    if serializer.is_valid():
+        data = request.data
+        Training.objects.filter(id=id).update(date=data['date'], time=data['time'])
+        return Response(status=200)
+    else:
+        return Response(status=400)
+
+
+

@@ -44,6 +44,7 @@ class TrainingUserItemSerializer(serializers.ModelSerializer):
 class GroupTrainingItemSerializer(serializers.ModelSerializer):
     time = serializers.TimeField()
     date = serializers.DateField()
+    image = serializers.CharField()
 
     class Meta:
         model = GroupTraining
@@ -57,3 +58,11 @@ class UserLoginItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['name', 'password']
+
+class TrainingTimeItemSerializer(serializers.ModelSerializer):
+    date = serializers.DateField()
+    time = serializers.TimeField()
+
+    class Meta:
+        model = Training
+        fields = ['date', 'time']
