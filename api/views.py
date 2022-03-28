@@ -82,12 +82,13 @@ def training_user(request):
 
 @api_view(['DELETE'])
 def delete_training(request, id):
-    trainings_users = TrainingUser.objects.get(training=id)
-    object = Training.objects.get(id=id)
+    trainings_users = TrainingUser.objects.filter(training=id)
+    object = Training.objects.filter(id=id)
     if not object:
         return Response(status=400)
     else:
-        trainings_users.delete()
+        if trainings_users:
+            trainings_users.delete()
         object.delete()
         return Response(status=200)
     
