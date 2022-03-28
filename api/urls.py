@@ -3,7 +3,7 @@ from . import views
 
 
 urlpatterns = [
-    #path('admin/trainings/change/<int:id>', ),
+    path('admin/trainings/change/<int:id>', views.put_training),
     path('admin/trainings/<int:id>', views.delete_training),
     path('admin/trainings', views.add_training),
     path('admin/grouptrainings', views.put_grouptraining),
