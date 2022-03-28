@@ -62,6 +62,7 @@ class GroupTraining(models.Model):
     #user_id = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     time = models.TimeField()
     date = models.DateField(default=django.utils.timezone.now)
+    image = models.TextField(default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
