@@ -23,15 +23,23 @@ connection = psycopg2.connect(
 cursor = connection.cursor()
 
 def admin_auth(serializer,player_token):
-    admin_object = User.objects.get(role='Admin')
+    
+    try:
+        admin_object = User.objects.get(role='Admin')
+    except User.DoesNotExist:
+        return False
     if admin_object.user_token != player_token:
         return False
     else:
         return True
 def user_auth(serializer,player_token):
     
-    admin_object = User.objects.get(user_token=player_token)
-    if admin_object.user_token != player_token:
+    
+    try:
+        user_object = User.objects.get(user_token=player_token)
+    except User.DoesNotExist:
+        return False
+    if user_object.user_token != player_token:
         return False
     else:
         return True    
@@ -129,7 +137,11 @@ def delete_training(request,player_token, id):
 
 @api_view(['GET'])
 def get_trainings(request,player_token):
-    user_object = User.objects.get(user_token=player_token)
+    
+    try:
+        user_object = User.objects.get(user_token=player_token)
+    except User.DoesNotExist:
+        return Response(status=401)
     '''
     somarina = {
             "user_token":user_object.user_token,
@@ -140,7 +152,7 @@ def get_trainings(request,player_token):
     if not user_object:
         return Response(status=401)
     
-    cursor.execute("SELECT id, title, time, date, CASE WHEN training_id is NULL THEN False ELSE True END as signed_up from trainings LEFT JOIN (SELECT training_id FROM user_training WHERE user_id = %d) x ON trainings.id = training_id ".format(user_object.id))
+    cursor.execute("SELECT id, title, time, date, CASE WHEN training_id is NULL THEN False ELSE True END as signed_up from trainings LEFT JOIN (SELECT training_id FROM user_training WHERE user_id = {}) x ON trainings.id = training_id ".format(user_object.id))
     record = cursor.fetchone()
     if record == None :
         somarina = {
