@@ -58,6 +58,7 @@ class UserLoginItemSerializer(serializers.ModelSerializer):
         model = User
         fields = ['name', 'password']
 
+
 class TrainingTimeItemSerializer(serializers.ModelSerializer):
     date = serializers.DateField()
     time = serializers.TimeField()
