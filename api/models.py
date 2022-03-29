@@ -2,14 +2,14 @@ from django.db import models
 from datetime import date
 import django.utils.timezone
 from django.utils.crypto import get_random_string
-from nanoid import generate
+
 
 class User(models.Model):
     name = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
     password = models.CharField(max_length=200)
     role = models.CharField(max_length=200, default="User")
-    user_token = models.CharField(max_length=200, default=generate(size=20))
+    user_token = models.CharField(max_length=200, default=get_random_string(length=32))
     group_training = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
