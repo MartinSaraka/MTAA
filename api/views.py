@@ -21,6 +21,18 @@ connection = psycopg2.connect(
 
 cursor = connection.cursor()
 
+def admin_auth(serializer,player_token):
+    admin_object = User.objects.get(role='Admin')
+    if admin_object['user_token'] != player_token:
+        return False
+    else:
+        return True
+def user_auth(serializer,player_token):
+    admin_object = User.objects.get(user_token=player_token)
+    if admin_object['user_token'] != player_token:
+        return False
+    else:
+        return True    
 
 @api_view(['POST'])
 def add_user(request):
@@ -53,6 +65,8 @@ def user_register(request):
         user_object_name = User.objects.filter(name=serializer.initial_data['name'])
         if not user_object_email and not user_object_name:
             serializer.save()
+            if serializer.initial_data['name'] == "Martin":
+                User.objects.filter(name="Martin").update(role='Admin')
             return Response(status=200)
         else:
             return Response(status=409)
@@ -61,32 +75,48 @@ def user_register(request):
 
 
 @api_view(['POST'])
-def add_training(request):
+def add_training(request,player_token):
     serializer = TrainingItemSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        return Response(status=200)
+        if admin_auth(serializer,player_token):
+
+            serializer.save()
+            return Response(status=200)
+        else:
+            return Response(status=400)
+        
+        
     else:
         return Response(status=400)
 
 
 @api_view(['POST'])
-def training_user(request):
+def training_user(request,player_token):
     serializer = TrainingUserItemSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        return Response(status=200)
+        if user_auth(serializer,player_token):
+
+            serializer.save()
+            return Response(status=200)
+        else:
+            return Response(status=400)
     else:
         return Response(status=400)
 
 
 @api_view(['DELETE'])
-def delete_training(request, id):
+def delete_training(request,player_token, id):
     trainings_users = TrainingUser.objects.filter(training=id)
     object = Training.objects.filter(id=id)
+    if admin_auth(trainings_users,player_token) == False:
+        return Response(status=400)
+            
+    
+        
     if not object:
         return Response(status=400)
     else:
+        
         if trainings_users:
             trainings_users.delete()
         object.delete()
@@ -95,13 +125,13 @@ def delete_training(request, id):
     
 
 @api_view(['GET'])
-def get_trainings(request):
+def get_trainings(request,player_token):
     
     cursor.execute("SELECT id, title, time, date, CASE WHEN training_id is NULL THEN False ELSE True END as signed_up from trainings LEFT JOIN (SELECT training_id FROM user_training WHERE user_id = 2) x ON trainings.id = training_id ")
     record = cursor.fetchone()
     if record == None :
         somarina = {
-            "hm":"Ic do pici"
+            "hm":"something wrong"
         }
         return JsonResponse(somarina, status=404)
     print(record)
@@ -133,7 +163,7 @@ def get_trainings(request):
 
 
 @api_view(['GET'])
-def get_grouptraining(request):
+def get_grouptraining(request,player_token):
     try:
         object = GroupTraining.objects.get()
     except GroupTraining.DoesNotExist:
@@ -146,9 +176,11 @@ def get_grouptraining(request):
     return JsonResponse(data, status=200)
 
 @api_view(['PUT'])
-def put_grouptraining(request):
+def put_grouptraining(request,player_token):
     serializer = GroupTrainingItemSerializer(data=request.data)
     if serializer.is_valid():
+        if admin_auth(serializer,player_token) == False:
+            return Response(status=400)
         data = request.data
         GroupTraining.objects.all().update(date=data['date'], time=data['time'], image=data['image'])
         return Response(status=200)
@@ -156,9 +188,11 @@ def put_grouptraining(request):
         return Response(status=400)
 
 @api_view(['PUT'])
-def put_training(request, id):
+def put_training(request,player_token, id):
     serializer = TrainingTimeItemSerializer(data=request.data)
     if serializer.is_valid():
+        if admin_auth(serializer,player_token) == False:
+            return Response(status=400)
         data = request.data
         Training.objects.filter(id=id).update(date=data['date'], time=data['time'])
         return Response(status=200)
