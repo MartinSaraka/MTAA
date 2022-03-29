@@ -8,6 +8,7 @@ from .serializers import *
 from .models import *
 import json
 import environ
+from django.utils.crypto import get_random_string
 env = environ.Env()
 environ.Env.read_env()
 
@@ -23,13 +24,14 @@ cursor = connection.cursor()
 
 def admin_auth(serializer,player_token):
     admin_object = User.objects.get(role='Admin')
-    if admin_object['user_token'] != player_token:
+    if admin_object.user_token != player_token:
         return False
     else:
         return True
 def user_auth(serializer,player_token):
+    
     admin_object = User.objects.get(user_token=player_token)
-    if admin_object['user_token'] != player_token:
+    if admin_object.user_token != player_token:
         return False
     else:
         return True    
@@ -67,6 +69,7 @@ def user_register(request):
             serializer.save()
             if serializer.initial_data['name'] == "Martin":
                 User.objects.filter(name="Martin").update(role='Admin')
+            User.objects.filter(name=serializer.initial_data['name']).update(user_token=get_random_string(length=32))
             return Response(status=200)
         else:
             return Response(status=409)
@@ -83,7 +86,7 @@ def add_training(request,player_token):
             serializer.save()
             return Response(status=200)
         else:
-            return Response(status=400)
+            return Response(status=401)
         
         
     else:
@@ -99,7 +102,7 @@ def training_user(request,player_token):
             serializer.save()
             return Response(status=200)
         else:
-            return Response(status=400)
+            return Response(status=401)
     else:
         return Response(status=400)
 
@@ -109,7 +112,7 @@ def delete_training(request,player_token, id):
     trainings_users = TrainingUser.objects.filter(training=id)
     object = Training.objects.filter(id=id)
     if admin_auth(trainings_users,player_token) == False:
-        return Response(status=400)
+        return Response(status=401)
             
     
         
@@ -126,8 +129,18 @@ def delete_training(request,player_token, id):
 
 @api_view(['GET'])
 def get_trainings(request,player_token):
+    user_object = User.objects.get(user_token=player_token)
+    '''
+    somarina = {
+            "user_token":user_object.user_token,
+            "player_token":player_token,
+            "user_id":user_object.id
+        }
+    return Response(somarina,status=404)'''
+    if not user_object:
+        return Response(status=401)
     
-    cursor.execute("SELECT id, title, time, date, CASE WHEN training_id is NULL THEN False ELSE True END as signed_up from trainings LEFT JOIN (SELECT training_id FROM user_training WHERE user_id = 2) x ON trainings.id = training_id ")
+    cursor.execute("SELECT id, title, time, date, CASE WHEN training_id is NULL THEN False ELSE True END as signed_up from trainings LEFT JOIN (SELECT training_id FROM user_training WHERE user_id = %d) x ON trainings.id = training_id ".format(user_object.id))
     record = cursor.fetchone()
     if record == None :
         somarina = {
@@ -180,7 +193,7 @@ def put_grouptraining(request,player_token):
     serializer = GroupTrainingItemSerializer(data=request.data)
     if serializer.is_valid():
         if admin_auth(serializer,player_token) == False:
-            return Response(status=400)
+            return Response(status=401)
         data = request.data
         GroupTraining.objects.all().update(date=data['date'], time=data['time'], image=data['image'])
         return Response(status=200)
@@ -192,7 +205,7 @@ def put_training(request,player_token, id):
     serializer = TrainingTimeItemSerializer(data=request.data)
     if serializer.is_valid():
         if admin_auth(serializer,player_token) == False:
-            return Response(status=400)
+            return Response(status=401)
         data = request.data
         Training.objects.filter(id=id).update(date=data['date'], time=data['time'])
         return Response(status=200)
