@@ -5,11 +5,10 @@ from .models import Coach, Training, User, TrainingUser, GroupTraining
 class UserItemSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=200)
     email = serializers.CharField(max_length=200)
-    password = serializers.CharField(max_length=200)
-
+    password = serializers.CharField(max_length=200)    
     class Meta:
         model = User
-        fields = ['name', 'email', 'password']
+        fields = ['name', 'email', 'password',]
 
 
 class CoachItemSerializer(serializers.ModelSerializer):
