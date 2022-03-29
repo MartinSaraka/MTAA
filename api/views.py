@@ -22,8 +22,8 @@ connection = psycopg2.connect(
 
 cursor = connection.cursor()
 
-def admin_auth(serializer,player_token):
-    
+
+def admin_auth(serializer, player_token):
     try:
         admin_object = User.objects.get(role='Admin')
     except User.DoesNotExist:
@@ -32,9 +32,9 @@ def admin_auth(serializer,player_token):
         return False
     else:
         return True
-def user_auth(serializer,player_token):
-    
-    
+
+
+def user_auth(serializer, player_token):
     try:
         user_object = User.objects.get(user_token=player_token)
     except User.DoesNotExist:
@@ -42,17 +42,8 @@ def user_auth(serializer,player_token):
     if user_object.user_token != player_token:
         return False
     else:
-        return True    
+        return True
 
-@api_view(['POST'])
-def add_user(request):
-    print("hello")
-    api_key = request.GET.get('api_key')
-    #serializer = UserItemSerializer(data=request.data)
-    #if serializer.is_valid():
-        #serializer.save()
-    #else:
-        #print("Not good")
 
 @api_view(['POST'])
 def user_login(request):
@@ -60,12 +51,13 @@ def user_login(request):
     if serializer.is_valid():
         user_object = User.objects.filter(name=serializer.initial_data['name'], password=serializer.initial_data['password'])
         if user_object:
-            data = {"id":user_object[0].id}
+            data = {"id": user_object[0].id, "user_token":user_object[0].user_token}
             return JsonResponse(data, status=200)
         else:
             return Response(status=403)
     else:
         return Response(status=400)
+
 
 @api_view(['POST'])
 def user_register(request):
@@ -86,27 +78,24 @@ def user_register(request):
 
 
 @api_view(['POST'])
-def add_training(request,player_token):
+def add_training(request, player_token):
     serializer = TrainingItemSerializer(data=request.data)
     if serializer.is_valid():
-        if admin_auth(serializer,player_token):
+        if admin_auth(serializer, player_token):
 
             serializer.save()
             return Response(status=200)
         else:
             return Response(status=401)
-        
-        
     else:
         return Response(status=400)
 
 
 @api_view(['POST'])
-def training_user(request,player_token):
+def training_user(request, player_token):
     serializer = TrainingUserItemSerializer(data=request.data)
     if serializer.is_valid():
-        if user_auth(serializer,player_token):
-
+        if user_auth(serializer, player_token):
             serializer.save()
             return Response(status=200)
         else:
@@ -121,34 +110,21 @@ def delete_training(request,player_token, id):
     object = Training.objects.filter(id=id)
     if admin_auth(trainings_users,player_token) == False:
         return Response(status=401)
-            
-    
-        
     if not object:
-        return Response(status=400)
+        return Response(status=404)
     else:
-        
         if trainings_users:
             trainings_users.delete()
         object.delete()
         return Response(status=200)
     
-    
 
 @api_view(['GET'])
 def get_trainings(request,player_token):
-    
     try:
         user_object = User.objects.get(user_token=player_token)
     except User.DoesNotExist:
         return Response(status=401)
-    '''
-    somarina = {
-            "user_token":user_object.user_token,
-            "player_token":player_token,
-            "user_id":user_object.id
-        }
-    return Response(somarina,status=404)'''
     if not user_object:
         return Response(status=401)
     
@@ -188,7 +164,13 @@ def get_trainings(request,player_token):
 
 
 @api_view(['GET'])
-def get_grouptraining(request,player_token):
+def get_grouptraining(request, player_token):
+    try:
+        user_object = User.objects.get(user_token=player_token)
+    except User.DoesNotExist:
+        return Response(status=401)
+    if not user_object:
+        return Response(status=401)
     try:
         object = GroupTraining.objects.get()
     except GroupTraining.DoesNotExist:
@@ -200,11 +182,12 @@ def get_grouptraining(request,player_token):
     }
     return JsonResponse(data, status=200)
 
+
 @api_view(['PUT'])
-def put_grouptraining(request,player_token):
+def put_grouptraining(request, player_token):
     serializer = GroupTrainingItemSerializer(data=request.data)
     if serializer.is_valid():
-        if admin_auth(serializer,player_token) == False:
+        if admin_auth(serializer, player_token) == False:
             return Response(status=401)
         data = request.data
         GroupTraining.objects.all().update(date=data['date'], time=data['time'], image=data['image'])
@@ -212,13 +195,16 @@ def put_grouptraining(request,player_token):
     else:
         return Response(status=400)
 
+
 @api_view(['PUT'])
-def put_training(request,player_token, id):
+def put_training(request, player_token, id):
     serializer = TrainingTimeItemSerializer(data=request.data)
     if serializer.is_valid():
         if admin_auth(serializer,player_token) == False:
             return Response(status=401)
         data = request.data
+        if not Training.objects.filter(id=id):
+            return Response(status=404)
         Training.objects.filter(id=id).update(date=data['date'], time=data['time'])
         return Response(status=200)
     else:
