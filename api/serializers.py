@@ -6,11 +6,10 @@ class UserItemSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=200)
     email = serializers.CharField(max_length=200)
     password = serializers.CharField(max_length=200)
-    role = serializers.CharField(max_length=200)
 
     class Meta:
         model = User
-        fields = ['name', 'email', 'password', 'role']
+        fields = ['name', 'email', 'password']
 
 
 class CoachItemSerializer(serializers.ModelSerializer):
@@ -48,7 +47,7 @@ class GroupTrainingItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroupTraining
-        fields = ['time', 'date']
+        fields = ['time', 'date', 'image']
 
 
 class UserLoginItemSerializer(serializers.ModelSerializer):
